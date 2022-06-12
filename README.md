@@ -32,10 +32,19 @@ func main() {
 }
 ```
 
-This will return a `maxine` instance that has a create query
+All actions will return a `maxine` instance:
 
 ```
-CREATE (flava:User {id: $id, name: $name, email: $email}) RETURN flava
+&maxine{
+	Query:CREATE (flava:User {id: $id, name: $name, email: $email}) RETURN flava 
+	SetQuery:flava.id = $id, flava.name = $name, flava.email = $email 
+	CreateQuery:{id: $id, name: $name, email: $email} 
+	Params:map[
+		email:spam@aol.com 
+		id:someID 
+		name:emehrkay] 
+	TagName:json Variable:flava
+}
 ```
 
 Create Node while removing fields
