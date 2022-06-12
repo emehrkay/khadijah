@@ -80,7 +80,12 @@ func (r *regine) detachDeleteNodeWithMatch(entity interface{}, matchClause strin
 	return r.deleteNodeWithMatch(entity, true, matchClause)
 }
 
-// MATCH (x {param: $param}) [DETACH] DELETE x
+// MATCH (x {param: $param}) DETACH DELETE x
 func (r *regine) detachDeleteNode(entity interface{}) *Maxine {
 	return r.deleteNodeWithMatch(entity, true, r.matchClause)
+}
+
+// MATCH (x {param: $param}) DELETE x
+func (r *regine) deleteNode(entity interface{}) *Maxine {
+	return r.deleteNodeWithMatch(entity, false, r.matchClause)
 }

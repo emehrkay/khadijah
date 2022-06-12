@@ -141,6 +141,13 @@ func (k *Khadijah) DetachDeleteNode(entity interface{}) *Maxine {
 	return k.DeleteNodeWithMatch(entity, true, k.MatchClause)
 }
 
+// DeleteNode build a MATCH ... [DETACH] DELETE cypher query using the default
+// matching clause
+//		MATCH (x {param: $param}) [DETACH] DELETE x
+func (k *Khadijah) DeleteNode(entity interface{}, detach bool) *Maxine {
+	return k.DeleteNodeWithMatch(entity, detach, k.MatchClause)
+}
+
 // CreateEdge builds a complex MATCh (nodeA), (nodeB) CREATE query
 //		MATCH (start:Lable {matches}), (end:Label {props}) CREATE (start)-[edge:label {matches}]->(end) RETURN start, end, edge
 func (k *Khadijah) CreateEdge(start, end, edge interface{}, direction, startLabel, endLabel, edgeLabel string, withReturn bool, excldues ...string) *Maxine {
