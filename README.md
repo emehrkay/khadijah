@@ -32,10 +32,10 @@ func main() {
 }
 ```
 
-All actions will return a `maxine` instance:
+All actions will return a `Maxine` instance:
 
 ```
-&maxine{
+&Maxine{
 	Query:CREATE (flava:User {id: $id, name: $name, email: $email}) RETURN flava 
 	SetQuery:flava.id = $id, flava.name = $name, flava.email = $email 
 	CreateQuery:{id: $id, name: $name, email: $email} 

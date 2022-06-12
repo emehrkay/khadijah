@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-// NewMaxine will create a new instance of maxine with a given tagName and variable
-func NewMaxine(tagName, variable string) *maxine {
-	maxx := &maxine{
+// NewMaxine will create a new instance of Maxine with a given tagName and variable
+func NewMaxine(tagName, variable string) *Maxine {
+	maxx := &Maxine{
 		Params:   M{},
 		TagName:  tagName,
 		Variable: variable,
@@ -17,8 +17,8 @@ func NewMaxine(tagName, variable string) *maxine {
 	return maxx
 }
 
-type maxine struct {
-	// hods the findal quuery. This isn't prdouced in maxine, but is callers
+type Maxine struct {
+	// hods the findal quuery. This isn't prdouced in Maxine, but is callers
 	Query string `json:"query"`
 
 	// holds the set information: "var.name = $name, var.age = $age, var.paramN = $paramN"
@@ -40,15 +40,15 @@ type maxine struct {
 // Parse does the work of converting a struct to query placeloders and
 // a params map. This will exclude any fields passed in as exclude
 // it uses the tag name to matach the field name to the cypher property
-// a new maxine instance is created on every call allowing reuse of previously
+// a new Maxine instance is created on every call allowing reuse of previously
 // defined properties
 // example return:
-// maxine{
+// Maxine{
 //     CreateQuery: "{email: $email, username: $username, password: $password}",
 // 	   SetQuery: "u.email = $email, u.usrname = $username, u.password = $password",
 //     Parms: M{"email": entity.Email, "username": entity.Username, "password": entity.Password},
 // }
-func (m *maxine) Parse(entity interface{}, exclude ...string) *maxine {
+func (m *Maxine) Parse(entity interface{}, exclude ...string) *Maxine {
 	maxx := NewMaxine(m.TagName, m.Variable)
 	queryParams := []string{}
 	setParams := []string{}
