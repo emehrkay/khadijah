@@ -38,6 +38,22 @@ This will return a `maxine` instance that has a create query
 CREATE (flava:User {id: $id, name: $name, email: $email}) RETURN flava
 ```
 
+Create Node while removing fields
+
+```go
+create := instance.CreateNode(mark, "User", true, "id", "email")
+
+// CREATE (flava:User {name: $name}) RETURN flava
+```
+
+Update Node
+
+```go
+update := instance.UpdateNode(mark, "User", true, "id")
+
+// MERGE (flava:User {id: $id}) SET flava.name = $name, flava.email = $email RETURN flava
+```
+
 ## F.A.Q. 
 
 1. What's with the naming?
