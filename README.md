@@ -54,6 +54,16 @@ update := instance.UpdateNode(mark, "User", true, "id")
 // MERGE (flava:User {id: $id}) SET flava.name = $name, flava.email = $email RETURN flava
 ```
 
+Detach Delete Node
+
+```go
+delete := instance.DetachDeleteNode(mark)
+
+// MATCH (flava {id: $id}) DETACH DELETE flava
+```
+
+> these functions are abstracted from a base version which offer more control. Look at the souce
+
 ## F.A.Q. 
 
 1. What's with the naming?
