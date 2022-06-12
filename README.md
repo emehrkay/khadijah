@@ -48,6 +48,9 @@ CREATE (flava:User {id: $id, name: $name, email: $email}) RETURN flava
 
 * I'll put together something soon. Hopefully the interface is simple enough to grok becuase this doesn't really do too much. Just start with `khadijah` and work your way out.
 
+3. Go version support?
+
+* I don't know. I didn't use `any` or any generics because those features arent really necessary and not everyone has 1.18+
 ## License
 
 MIT
