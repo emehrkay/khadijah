@@ -55,6 +55,11 @@ CREATE (flava:User {id: $id, name: $name, email: $email}) RETURN flava
 4. Why?
 
 * I'm lazy and I wrote a couple of string queries and decided to abstract it to a function. Then I said "this could be a lib," and now we're here.
+
+5. Do these queries work?
+
+* 😬  I don't know. I haven't tested them all. They should though. They should.
+
 ## License
 
 MIT
