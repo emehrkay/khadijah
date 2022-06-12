@@ -51,6 +51,10 @@ CREATE (flava:User {id: $id, name: $name, email: $email}) RETURN flava
 3. Go version support?
 
 * I don't know. I didn't use `any` or any generics because those features arent really necessary and not everyone has 1.18+
+
+4. Why?
+
+* I'm lazy and I wrote a couple of string queries and decided to abstract it to a function. Then I said "this could be a lib," and now we're here.
 ## License
 
 MIT
