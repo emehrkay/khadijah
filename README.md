@@ -43,15 +43,18 @@ All actions will return a `Maxine` instance:
 	Params:map[
 		email:spam@aol.com 
 		id:someID 
-		name:emehrkay] 
-	TagName:json Variable:flava
+		name:emehrkay
+	] 
+	TagName:json 
+	Variable:flava
+	EntityName:User
 }
 ```
 
 Create Node while removing fields
 
 ```go
-create := instance.CreateNode(mark, "User", true, "id", "email")
+create := instance.CreateNode(mark, nil, true, "id", "email")
 
 // CREATE (flava:User {name: $name}) RETURN flava
 ```
@@ -59,7 +62,7 @@ create := instance.CreateNode(mark, "User", true, "id", "email")
 Update Node
 
 ```go
-update := instance.UpdateNode(mark, "User", true, "id")
+update := instance.UpdateNode(mark, &label, true, "id")
 
 // MERGE (flava:User {id: $id}) SET flava.name = $name, flava.email = $email RETURN flava
 ```
