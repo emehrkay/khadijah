@@ -105,7 +105,8 @@ func TestNew(t *testing.T) {
 	}
 }
 
-const userLabel = "User"
+var ul = "user"
+var userLabel *string = &ul
 
 type TestJsonUser struct {
 	ID    string `json:"id"`
@@ -181,37 +182,37 @@ func TestCreateNode(t *testing.T) {
 			tests := []Create{
 				{
 					"create without any excludes and a return",
-					fmt.Sprintf("CREATE (%s:%s {id: $id, name: $name, email: $email}) RETURN %s", instance.Variable, userLabel, instance.Variable),
+					fmt.Sprintf("CREATE (%s:%s {id: $id, name: $name, email: $email}) RETURN %s", instance.Variable, *userLabel, instance.Variable),
 					true,
 					[]string{},
 				},
 				{
 					"create without any excludes and without a return",
-					fmt.Sprintf("CREATE (%s:%s {id: $id, name: $name, email: $email})", instance.Variable, userLabel),
+					fmt.Sprintf("CREATE (%s:%s {id: $id, name: $name, email: $email})", instance.Variable, *userLabel),
 					false,
 					[]string{},
 				},
 				{
 					"create while excluding id and a return",
-					fmt.Sprintf("CREATE (%s:%s {name: $name, email: $email}) RETURN %s", instance.Variable, userLabel, instance.Variable),
+					fmt.Sprintf("CREATE (%s:%s {name: $name, email: $email}) RETURN %s", instance.Variable, *userLabel, instance.Variable),
 					true,
 					[]string{"id"},
 				},
 				{
 					"create while excluding id and without a return",
-					fmt.Sprintf("CREATE (%s:%s {name: $name, email: $email})", instance.Variable, userLabel),
+					fmt.Sprintf("CREATE (%s:%s {name: $name, email: $email})", instance.Variable, *userLabel),
 					false,
 					[]string{"id"},
 				},
 				{
 					"create while excluding everything and with a return",
-					fmt.Sprintf("CREATE (%s:%s {}) RETURN %s", instance.Variable, userLabel, instance.Variable),
+					fmt.Sprintf("CREATE (%s:%s {}) RETURN %s", instance.Variable, *userLabel, instance.Variable),
 					true,
 					[]string{"id", "name", "email"},
 				},
 				{
 					"create while excluding everything and without a return",
-					fmt.Sprintf("CREATE (%s:%s {})", instance.Variable, userLabel),
+					fmt.Sprintf("CREATE (%s:%s {})", instance.Variable, *userLabel),
 					false,
 					[]string{"id", "name", "email"},
 				},
@@ -248,7 +249,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 					"should update with default match clause and return",
 					fmt.Sprintf(`MERGE (%s:%s {id: $id}) SET %s, %s, %s RETURN %s`,
 						instance.Variable,
-						userLabel,
+						*userLabel,
 						aliasField(instance.Variable, "id"),
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email"),
@@ -261,7 +262,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 					"should update with default match clause and without a return",
 					fmt.Sprintf(`MERGE (%s:%s {id: $id}) SET %s, %s, %s`,
 						instance.Variable,
-						userLabel,
+						*userLabel,
 						aliasField(instance.Variable, "id"),
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email")),
@@ -273,7 +274,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 					"should update with default match clause while ignoring id and return",
 					fmt.Sprintf(`MERGE (%s:%s {id: $id}) SET %s, %s RETURN %s`,
 						instance.Variable,
-						userLabel,
+						*userLabel,
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email"),
 						instance.Variable),
@@ -285,7 +286,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 					"should update with default match clause while ignoring id and without a return",
 					fmt.Sprintf(`MERGE (%s:%s {id: $id}) SET %s, %s`,
 						instance.Variable,
-						userLabel,
+						*userLabel,
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email")),
 					k.DefaultMatchClause,
@@ -296,7 +297,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 					"should update with custom match clause while ignoring id and return",
 					fmt.Sprintf(`MERGE (%s:%s {custom: $custom}) SET %s, %s RETURN %s`,
 						instance.Variable,
-						userLabel,
+						*userLabel,
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email"),
 						instance.Variable),
@@ -308,7 +309,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 					"should update with custom match clause while ignoring id and without a return",
 					fmt.Sprintf(`MERGE (%s:%s {custom: $custom}) SET %s, %s`,
 						instance.Variable,
-						userLabel,
+						*userLabel,
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email")),
 					"{custom: $custom}",

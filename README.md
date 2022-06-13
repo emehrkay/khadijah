@@ -26,7 +26,8 @@ func main() {
 		Email: "spam@aol.com",
 	}
 	instance := khadijah.New()
-	create := instance.CreateNode(mark, "User", true)
+	label := "User"
+	create := instance.CreateNode(mark, &label, true) // if nil is paseed in for label, the entity's Name is used
 
 	fmt.Printf(`%+v`, create)
 }

@@ -34,7 +34,7 @@ func (s *synclarie) getDirection(direction string) (dirStart, dirEnd string) {
 	return dirStart, dirEnd
 }
 
-func (s *synclarie) createEdgeWithMatches(start interface{}, startLabel, startMatchClause, direction string, end interface{}, endLabel, endMatchClause string, edge interface{}, edgeLabel string, withReturn bool, excldues ...string) *Maxine {
+func (s *synclarie) createEdgeWithMatches(start interface{}, startLabel *string, startMatchClause, direction string, end interface{}, endLabel *string, endMatchClause string, edge interface{}, edgeLabel *string, withReturn bool, excldues ...string) *Maxine {
 	khadStart := New(
 		SetVariable("start"),
 		SetMatchClause(startMatchClause),
@@ -53,7 +53,7 @@ func (s *synclarie) createEdgeWithMatches(start interface{}, startLabel, startMa
 		khadStart.StartVariable,
 		dirStart,
 		maxx.Variable,
-		edgeLabel,
+		*edgeLabel,
 		maxx.CreateQuery,
 		dirEnd,
 		khadEnd.EndVariable)
@@ -65,7 +65,7 @@ func (s *synclarie) createEdgeWithMatches(start interface{}, startLabel, startMa
 	return maxx
 }
 
-func (s *synclarie) updateEdgeWithMatches(start interface{}, startLabel, startMatchClause, direction string, end interface{}, endLabel, endMatchClause string, edge interface{}, edgeLabel, edgeMatchClause string, withReturn bool, excldues ...string) *Maxine {
+func (s *synclarie) updateEdgeWithMatches(start interface{}, startLabel *string, startMatchClause, direction string, end interface{}, endLabel *string, endMatchClause string, edge interface{}, edgeLabel *string, edgeMatchClause string, withReturn bool, excldues ...string) *Maxine {
 	khadStart := New(
 		SetVariable("start"),
 		SetMatchClause(startMatchClause),
@@ -84,7 +84,7 @@ func (s *synclarie) updateEdgeWithMatches(start interface{}, startLabel, startMa
 		khadStart.StartVariable,
 		dirStart,
 		maxx.Variable,
-		edgeLabel,
+		*edgeLabel,
 		edgeMatchClause,
 		dirEnd,
 		khadEnd.EndVariable,
