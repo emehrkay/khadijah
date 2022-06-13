@@ -100,6 +100,7 @@ func main() {
 	)
 	// works the same as above, but using the myCoolTag values for the properties
 }
+```
 
 ## F.A.Q. 
 
