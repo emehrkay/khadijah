@@ -77,6 +77,30 @@ delete := instance.DetachDeleteNode(mark)
 
 > these functions are abstracted from a base version which offer more control. Look at the souce
 
+## Extra Recipes 
+
+You can set various attributes when you make an instance of Khadijah. Say you wanted to use a custom tag and not json:
+
+```go
+
+type User struct {
+	ID    string `myCoolTag:"id"`
+	Name  string `myCoolTag:"name"`
+	Email string `myCoolTag:"email"`
+}
+
+func main() {
+	mark := User{
+		ID:    "someID",
+		Name:  "emehrkay",
+		Email: "spam@aol.com",
+	}
+	instance := khadijah.New(
+		khadijah.SetTagName("myCoolTag"),
+	)
+	// works the same as above, but using the myCoolTag values for the properties
+}
+
 ## F.A.Q. 
 
 1. What's with the naming?
