@@ -2,6 +2,7 @@ package khadijah_test
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	k "github.com/emehrkay/khadijah"
@@ -15,7 +16,7 @@ func TestNew(t *testing.T) {
 		variable      string
 		startVariable string
 		endVariable   string
-		matchClause   string
+		matchClause   k.M
 	}
 
 	tests := []NewTest{
@@ -53,20 +54,20 @@ func TestNew(t *testing.T) {
 		{
 			"custom match cluase, rest default",
 			[]k.KhadijahSetting{
-				k.SetMatchClause("mymatchclause"),
+				k.SetMatchClause(k.M{"mymatch": "clause"}),
 			},
 			k.DefaultTagName,
 			k.DefaultVariable,
 			k.DefaultStartVariable,
 			k.DefaultEndVariable,
-			"mymatchclause",
+			k.M{"mymatch": "clause"},
 		},
 		{
 			"all custom",
 			[]k.KhadijahSetting{
 				k.SetTagName("mytag"),
 				k.SetVariable("hellox"),
-				k.SetMatchClause("mymatchclause"),
+				k.SetMatchClause(k.M{"mymatch": "clause"}),
 				k.SetStartVariable("startNew"),
 				k.SetEndVariable("endNew"),
 			},
@@ -74,7 +75,7 @@ func TestNew(t *testing.T) {
 			"hellox",
 			"startNew",
 			"endNew",
-			"mymatchclause",
+			k.M{"mymatch": "clause"},
 		},
 	}
 
@@ -98,15 +99,12 @@ func TestNew(t *testing.T) {
 				t.Errorf(`got %v for EndVariable, but expected %v`, instance.Variable, test.endVariable)
 			}
 
-			if instance.MatchClause != test.matchClause {
+			if !reflect.DeepEqual(instance.MatchClause, test.matchClause) {
 				t.Errorf(`got %v for MatchClause, but expected %v`, instance.MatchClause, test.matchClause)
 			}
 		})
 	}
 }
-
-var ul = "user"
-var userLabel *string = &ul
 
 type TestJsonUser struct {
 	ID    string `json:"id"`
@@ -124,10 +122,17 @@ type InstanceTypes struct {
 	name     string
 	settings []k.KhadijahSetting
 	user     interface{}
+	user2    interface{}
+}
+
+type Knows struct {
+	_ struct{}
 }
 
 var (
-	userJ = TestJsonUser{
+	ul                = "user"
+	userLabel *string = &ul
+	userJ             = TestJsonUser{
 		ID:    "someeyedee",
 		Name:  "somename",
 		Email: "emailTest",
@@ -139,10 +144,13 @@ var (
 		Email: "emailTest",
 	}
 
+	knows = Knows{}
+
 	cases = []InstanceTypes{
 		{
 			"with default settings",
 			[]k.KhadijahSetting{},
+			userJ,
 			userJ,
 		},
 		{
@@ -151,6 +159,7 @@ var (
 				k.SetTagName("custom"),
 			},
 			userC,
+			userJ,
 		},
 		{
 			"with custom tag and variable settings",
@@ -159,6 +168,7 @@ var (
 				k.SetVariable("xxxyyyzzz"),
 			},
 			userC,
+			userJ,
 		},
 	}
 )
@@ -235,7 +245,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 	type Update struct {
 		name        string
 		expected    string
-		matchClause string
+		matchClause k.M
 		withReturn  bool
 		excludes    []string
 	}
@@ -301,7 +311,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email"),
 						instance.Variable),
-					"{custom: $custom}",
+					k.M{"custom": "custom"},
 					true,
 					[]string{"id"},
 				},
@@ -312,7 +322,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 						*userLabel,
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email")),
-					"{custom: $custom}",
+					k.M{"custom": "custom"},
 					false,
 					[]string{"id"},
 				},
@@ -331,7 +341,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 					t.Run("UpdateNode", func(t *testing.T) {
 						// skip tests where the match clause is not the default one
 						// beacuase the UpdateNode function only uses the default match clause
-						if test.matchClause != k.DefaultMatchClause {
+						if !reflect.DeepEqual(test.matchClause, k.DefaultMatchClause) {
 							t.Skip("augmenting the matchClause is not relevant to this UpdateNode")
 							return
 						}
@@ -352,7 +362,7 @@ func TestDeleteNodeSuite(t *testing.T) {
 	type Delete struct {
 		name        string
 		expected    string
-		matchClause string
+		matchClause k.M
 		detach      bool
 	}
 
@@ -363,25 +373,25 @@ func TestDeleteNodeSuite(t *testing.T) {
 			tests := []Delete{
 				{
 					"can delete node with custom matching",
-					fmt.Sprintf(`MATCH (%s {abcDEFG=$a}) DELETE %s`, instance.Variable, instance.Variable),
-					"{abcDEFG=$a}",
+					fmt.Sprintf(`MATCH (%s {abcDEFG: $a}) DELETE %s`, instance.Variable, instance.Variable),
+					k.M{"abcDEFG": "a"},
 					false,
 				},
 				{
 					"can detach delete node with custom matching",
-					fmt.Sprintf(`MATCH (%s {abcDEFG=$a}) DETACH DELETE %s`, instance.Variable, instance.Variable),
-					"{abcDEFG=$a}",
+					fmt.Sprintf(`MATCH (%s {abcDEFG: $a}) DETACH DELETE %s`, instance.Variable, instance.Variable),
+					k.M{"abcDEFG": "a"},
 					true,
 				},
 				{
 					"can delete node with default matching",
-					fmt.Sprintf(`MATCH (%s %s) DELETE %s`, instance.Variable, instance.MatchClause, instance.Variable),
+					fmt.Sprintf(`MATCH (%s %s) DELETE %s`, instance.Variable, k.RootMaxx.MatchClause, instance.Variable),
 					instance.MatchClause,
 					false,
 				},
 				{
 					"can detach delete node with default matching",
-					fmt.Sprintf(`MATCH (%s %s) DETACH DELETE %s`, instance.Variable, instance.MatchClause, instance.Variable),
+					fmt.Sprintf(`MATCH (%s %s) DETACH DELETE %s`, instance.Variable, k.RootMaxx.MatchClause, instance.Variable),
 					instance.MatchClause,
 					true,
 				},
@@ -412,7 +422,7 @@ func TestDeleteNodeSuite(t *testing.T) {
 
 					t.Run("DetachDeleteNode", func(t *testing.T) {
 						// ignore tests without detach
-						if !test.detach || test.matchClause != k.DefaultMatchClause {
+						if !test.detach || !reflect.DeepEqual(test.matchClause, k.DefaultMatchClause) {
 							t.Skip("tests wihtout detach or use the default match clause do not apply to DetachDeleteNode")
 						}
 
@@ -429,7 +439,17 @@ func TestDeleteNodeSuite(t *testing.T) {
 }
 
 func TestCreateEdgeSuite(t *testing.T) {
+	type Create struct {
+		name     string
+		expected string
+	}
 
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			// instance := k.New(testCase.settings...)
+			// user := testCase.user
+		})
+	}
 }
 
 func TestUpdateEdgeSuite(t *testing.T) {

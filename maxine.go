@@ -7,13 +7,16 @@ import (
 )
 
 // NewMaxine will create a new instance of Maxine with a given tagName and variable
-func NewMaxine(tagName, variable, paramPrefix string) *Maxine {
+func NewMaxine(tagName, variable, paramPrefix string, matchClause M) *Maxine {
 	maxx := &Maxine{
-		Params:     M{},
-		TagName:    tagName,
-		Variable:   variable,
-		ParamPefix: paramPrefix,
+		Params:             M{},
+		TagName:            tagName,
+		Variable:           variable,
+		ParamPefix:         paramPrefix,
+		DefaultMatchClause: matchClause,
 	}
+
+	maxx.ParseMatchClause(matchClause)
 
 	return maxx
 }
@@ -42,6 +45,10 @@ type Maxine struct {
 
 	// Holds the name of the entity for use in situations where a label isn't provided
 	EntityName string `json:"entityName"`
+
+	MatchClause string `json:"matchClause"`
+
+	DefaultMatchClause M `json:"defaultMatchClause"`
 }
 
 // Parse does the work of converting a struct to query placeloders and
@@ -56,7 +63,7 @@ type Maxine struct {
 //     Parms: M{"email": entity.Email, "username": entity.Username, "password": entity.Password},
 // }
 func (m *Maxine) Parse(entity interface{}, exclude ...string) *Maxine {
-	maxx := NewMaxine(m.TagName, m.Variable, m.ParamPefix)
+	maxx := NewMaxine(m.TagName, m.Variable, m.ParamPefix, m.DefaultMatchClause)
 	queryParams := []string{}
 	setParams := []string{}
 	entityType := reflect.TypeOf(entity)
@@ -94,4 +101,18 @@ func (m *Maxine) Parse(entity interface{}, exclude ...string) *Maxine {
 	maxx.SetQuery = strings.Join(setParams, ", ")
 
 	return maxx
+}
+
+func (m *Maxine) ParseMatchClause(matchClause M) {
+	clause := []string{}
+
+	for k, v := range matchClause {
+		clause = append(clause, fmt.Sprintf(`%s: $%s`, k, m.GetTag(v)))
+	}
+
+	m.MatchClause = fmt.Sprintf(`{%s}`, strings.Join(clause, ", "))
+}
+
+func (m *Maxine) GetTag(tag interface{}) string {
+	return fmt.Sprintf(`%s%s`, m.ParamPefix, tag)
 }

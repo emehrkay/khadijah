@@ -2,18 +2,18 @@ package khadijah
 
 import "fmt"
 
-func newRegine(matchClause string) *regine {
+func newRegine(matchClause M) *regine {
 	return &regine{
 		matchClause: matchClause,
 	}
 }
 
 type regine struct {
-	matchClause string
+	matchClause M
 }
 
 func (r *regine) nodeWithProperties(entity interface{}, label *string) *Maxine {
-	maxx := rootMaxx.Parse(entity)
+	maxx := RootMaxx.Parse(entity)
 
 	if label == nil {
 		label = &maxx.EntityName
@@ -24,14 +24,15 @@ func (r *regine) nodeWithProperties(entity interface{}, label *string) *Maxine {
 	return maxx
 }
 
-func (r *regine) matchNodeWithMatch(entity interface{}, label *string, matchClause string, withReturn bool) *Maxine {
-	maxx := rootMaxx.Parse(entity)
+func (r *regine) matchNodeWithMatch(entity interface{}, label *string, matchClause M, withReturn bool) *Maxine {
+	maxx := RootMaxx.Parse(entity)
+	maxx.ParseMatchClause(matchClause)
 
 	if label == nil {
 		label = &maxx.EntityName
 	}
 
-	maxx.Query = fmt.Sprintf(`MATCH (%s:%s %s)`, maxx.Variable, *label, matchClause)
+	maxx.Query = fmt.Sprintf(`MATCH (%s:%s %s)`, maxx.Variable, *label, maxx.MatchClause)
 
 	if withReturn {
 		maxx.Query = fmt.Sprintf(`%s RETURN %s`, maxx.Query, maxx.Variable)
@@ -46,7 +47,7 @@ func (r *regine) matchNode(entity interface{}, label *string, withReturn bool) *
 
 // CREATE (x:Label {param: $param}) RETURN x
 func (r *regine) createNode(entity interface{}, label *string, withReturn bool, excludes ...string) *Maxine {
-	maxx := rootMaxx.Parse(entity, excludes...)
+	maxx := RootMaxx.Parse(entity, excludes...)
 
 	if label == nil {
 		label = &maxx.EntityName
@@ -62,14 +63,15 @@ func (r *regine) createNode(entity interface{}, label *string, withReturn bool, 
 }
 
 // MERGE (x:Label {param: $param}) SET param1 = $param1 RETURN x
-func (r *regine) updateNodeWithMatch(entity interface{}, label *string, matchClause string, withReturn bool, excludes ...string) *Maxine {
-	maxx := rootMaxx.Parse(entity, excludes...)
+func (r *regine) updateNodeWithMatch(entity interface{}, label *string, matchClause M, withReturn bool, excludes ...string) *Maxine {
+	maxx := RootMaxx.Parse(entity, excludes...)
+	maxx.ParseMatchClause(matchClause)
 
 	if label == nil {
 		label = &maxx.EntityName
 	}
 
-	maxx.Query = fmt.Sprintf(`MERGE (%s:%s %s) SET %s`, maxx.Variable, *label, matchClause, maxx.SetQuery)
+	maxx.Query = fmt.Sprintf(`MERGE (%s:%s %s) SET %s`, maxx.Variable, *label, maxx.MatchClause, maxx.SetQuery)
 
 	if withReturn {
 		maxx.Query = fmt.Sprintf(`%s RETURN %s`, maxx.Query, maxx.Variable)
@@ -84,19 +86,21 @@ func (r *regine) updateNode(entity interface{}, label *string, withReturn bool, 
 }
 
 // MATCH (x {param: $param}) [DETACH] DELETE x
-func (r *regine) deleteNodeWithMatch(entity interface{}, detach bool, matchClause string) *Maxine {
+func (r *regine) deleteNodeWithMatch(entity interface{}, detach bool, matchClause M) *Maxine {
 	detachClause := " "
 	if detach {
 		detachClause = " DETACH "
 	}
 
-	maxx := rootMaxx.Parse(entity)
-	maxx.Query = fmt.Sprintf(`MATCH (%s %s)%sDELETE %s`, maxx.Variable, matchClause, detachClause, maxx.Variable)
+	maxx := RootMaxx.Parse(entity)
+	maxx.ParseMatchClause(matchClause)
+
+	maxx.Query = fmt.Sprintf(`MATCH (%s %s)%sDELETE %s`, maxx.Variable, maxx.MatchClause, detachClause, maxx.Variable)
 	return maxx
 }
 
 // MATCH (x {param: $param}) [DETACH] DELETE x
-func (r *regine) detachDeleteNodeWithMatch(entity interface{}, matchClause string) *Maxine {
+func (r *regine) detachDeleteNodeWithMatch(entity interface{}, matchClause M) *Maxine {
 	return r.deleteNodeWithMatch(entity, true, matchClause)
 }
 
