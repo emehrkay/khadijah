@@ -13,7 +13,6 @@ var (
 		SetEndVariable(DefaultEndVariable),
 		SetMatchClause(DefaultMatchClause),
 	}
-	RootMaxx *Maxine
 )
 
 // KhadijahSetting type that defines a setting for Khadijah
@@ -38,6 +37,19 @@ func SetMatchClause(matchClause M) KhadijahSetting {
 	return func(instance *Khadijah) {
 		instance.MatchClause = matchClause
 	}
+}
+
+// SetMatchClauseSlice allows a slice of strings to be defined for the default
+// match clause. It will make a key=>val map where both are the entry in the slice
+// []string{"param"} => M{"param": "param"}
+func SetMatchClauseSlice(matchClause []string) KhadijahSetting {
+	clause := M{}
+
+	for _, v := range matchClause {
+		clause[v] = v
+	}
+
+	return SetMatchClause(clause)
 }
 
 // SetMatchClause will set Khadijah.StartVariable
@@ -69,7 +81,7 @@ func New(settings ...KhadijahSetting) *Khadijah {
 	settings = append(DefaultSettings, settings...)
 	instance := &Khadijah{}
 	instance.Apply(settings...)
-	RootMaxx = NewMaxine(instance.TagName, instance.Variable, instance.ParamPrefix, instance.MatchClause)
+	instance.RootMaxx = NewMaxine(instance.TagName, instance.Variable, instance.ParamPrefix, instance.MatchClause)
 
 	return instance
 }
@@ -81,6 +93,7 @@ type Khadijah struct {
 	EndVariable   string
 	MatchClause   M
 	ParamPrefix   string
+	RootMaxx      *Maxine
 }
 
 // Apply will set some properties on the instance
@@ -92,14 +105,14 @@ func (k *Khadijah) Apply(settings ...KhadijahSetting) {
 
 // NodeWithProperties creates a simple (var:label {propts}) string
 func (k *Khadijah) NodeWithProperties(entity interface{}, label *string) *Maxine {
-	reg := newRegine(k.MatchClause)
+	reg := newRegine(k.MatchClause, k.RootMaxx)
 
 	return reg.nodeWithProperties(entity, label)
 }
 
 // MatchNode creates a simple Match (var:label {props}) cypther query
 func (k *Khadijah) MatchNode(entity interface{}, label *string, withReturn bool) *Maxine {
-	reg := newRegine(k.MatchClause)
+	reg := newRegine(k.MatchClause, k.RootMaxx)
 
 	return reg.matchNode(entity, label, withReturn)
 }
@@ -107,7 +120,7 @@ func (k *Khadijah) MatchNode(entity interface{}, label *string, withReturn bool)
 // CreateNode builds a simple cypher CREATE query that looks like:
 //     CREATE (x:Label {param: $param}) RETURN x
 func (k *Khadijah) CreateNode(entity interface{}, label *string, withReturn bool, excludes ...string) *Maxine {
-	reg := newRegine(k.MatchClause)
+	reg := newRegine(k.MatchClause, k.RootMaxx)
 
 	return reg.createNode(entity, label, withReturn, excludes...)
 }
@@ -115,7 +128,7 @@ func (k *Khadijah) CreateNode(entity interface{}, label *string, withReturn bool
 // UpdateNodeWithMatch builds a simpole cyper Merge ... SET query that looks like:
 //		MERGE (x:Label {param: $param}) SET param1 = $param1 RETURN x
 func (k *Khadijah) UpdateNodeWithMatch(entity interface{}, label *string, matchClause M, withReturn bool, excludes ...string) *Maxine {
-	reg := newRegine(k.MatchClause)
+	reg := newRegine(k.MatchClause, k.RootMaxx)
 
 	return reg.updateNodeWithMatch(entity, label, matchClause, withReturn, excludes...)
 }
@@ -130,7 +143,7 @@ func (k *Khadijah) UpdateNode(entity interface{}, label *string, withReturn bool
 // DeleteNodeWithMatch builds a cypher MATCH .. DELETE quer that looks like:
 //		MATCH (x {param: $param}) [DETACH] DELETE x
 func (k *Khadijah) DeleteNodeWithMatch(entity interface{}, detach bool, matchClause M) *Maxine {
-	reg := newRegine(k.MatchClause)
+	reg := newRegine(k.MatchClause, k.RootMaxx)
 
 	return reg.deleteNodeWithMatch(entity, detach, matchClause)
 }
@@ -165,13 +178,13 @@ func (k *Khadijah) CreateEdge(start, end, edge interface{}, direction string, st
 // CreateEdgeWithMatches a complex MATCh (nodeA), (nodeB) CREATE query
 //		MATCH (start:Lable {matches}), (end:Label {props}) CREATE (start)-[edge:label {matches}]->(end) RETURN start, end, edge
 func (k *Khadijah) CreateEdgeWithMatches(start interface{}, startLabel *string, startMatchClause M, direction string, end interface{}, endLabel *string, endMatchClause M, edge interface{}, edgeLabel *string, withReturn bool, excldues ...string) *Maxine {
-	syn := newSynclaire(k.MatchClause, k.StartVariable, k.EndVariable)
+	syn := newSynclaire(k.MatchClause, k.StartVariable, k.EndVariable, k.RootMaxx)
 
 	return syn.createEdgeWithMatches(start, startLabel, startMatchClause, direction, end, endLabel, endMatchClause, edge, edgeLabel, withReturn, excldues...)
 }
 
 func (k *Khadijah) UpdateEdgeWithMatches(start interface{}, startLabel *string, startMatchClause M, direction string, end interface{}, endLabel *string, endMatchClause M, edge interface{}, edgeLabel *string, edgeMatchClause M, withReturn bool, excldues ...string) *Maxine {
-	syn := newSynclaire(k.MatchClause, k.StartVariable, k.EndVariable)
+	syn := newSynclaire(k.MatchClause, k.StartVariable, k.EndVariable, k.RootMaxx)
 
 	return syn.updateEdgeWithMatches(start, startLabel, startMatchClause, direction, end, endLabel, endMatchClause, edge, edgeLabel, edgeMatchClause, withReturn, excldues...)
 }

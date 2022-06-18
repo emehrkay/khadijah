@@ -77,14 +77,15 @@ func (m *Maxine) Parse(entity interface{}, exclude ...string) *Maxine {
 	entityValue := reflect.ValueOf(entity)
 	exclude = append(exclude, "-")
 
-	var getTag = func(tag string) string {
-		return fmt.Sprintf(`%s%s`, m.ParamPefix, tag)
-	}
-
-	for i := 0; i < entityType.NumField(); i++ {
-		field := entityType.Field(i)
+	// for i := 0; i < entityType.NumField(); i++ {
+	for _, field := range reflect.VisibleFields(entityType) {
+		// field := entityType.Field(i)
 		tag, ok := field.Tag.Lookup(m.TagName)
-		tagFixed := getTag(tag)
+		if strings.TrimSpace(tag) == "" {
+			continue
+		}
+
+		tagFixed := m.GetTag(tag)
 
 		// only add the param if it is not in the exclude list
 		if ok && !Contains(exclude, tag) {
@@ -97,7 +98,10 @@ func (m *Maxine) Parse(entity interface{}, exclude ...string) *Maxine {
 		maxx.Params[tagFixed] = value
 	}
 
-	maxx.CreateQuery = fmt.Sprintf(`{%s}`, strings.Join(queryParams, ", "))
+	if len(queryParams) > 0 {
+		maxx.CreateQuery = fmt.Sprintf(`{%s}`, strings.Join(queryParams, ", "))
+	}
+
 	maxx.SetQuery = strings.Join(setParams, ", ")
 
 	return maxx
@@ -107,12 +111,34 @@ func (m *Maxine) ParseMatchClause(matchClause M) {
 	clause := []string{}
 
 	for k, v := range matchClause {
-		clause = append(clause, fmt.Sprintf(`%s: $%s`, k, m.GetTag(v)))
+		tagValue := m.GetTag(v)
+		clause = append(clause, fmt.Sprintf(`%s: $%s`, k, tagValue))
+		m.Params[tagValue] = tagValue
 	}
 
-	m.MatchClause = fmt.Sprintf(`{%s}`, strings.Join(clause, ", "))
+	if len(clause) > 0 {
+		m.MatchClause = fmt.Sprintf(`{%s}`, strings.Join(clause, ", "))
+	}
 }
 
 func (m *Maxine) GetTag(tag interface{}) string {
 	return fmt.Sprintf(`%s%s`, m.ParamPefix, tag)
+}
+
+func (m *Maxine) MergeParams(params ...M) {
+	m.MergeParamsSafe(false, params...)
+}
+
+func (m *Maxine) MergeParamsSafe(ensureUnique bool, params ...M) {
+	for _, param := range params {
+		for k, v := range param {
+			if ensureUnique {
+				if _, ok := m.Params[k]; !ok {
+					m.Params[k] = v
+				}
+			} else {
+				m.Params[k] = v
+			}
+		}
+	}
 }

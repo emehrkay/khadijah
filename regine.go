@@ -2,18 +2,20 @@ package khadijah
 
 import "fmt"
 
-func newRegine(matchClause M) *regine {
+func newRegine(matchClause M, rootMaxx *Maxine) *regine {
 	return &regine{
 		matchClause: matchClause,
+		rootMaxx:    rootMaxx,
 	}
 }
 
 type regine struct {
 	matchClause M
+	rootMaxx    *Maxine
 }
 
 func (r *regine) nodeWithProperties(entity interface{}, label *string) *Maxine {
-	maxx := RootMaxx.Parse(entity)
+	maxx := r.rootMaxx.Parse(entity)
 
 	if label == nil {
 		label = &maxx.EntityName
@@ -25,7 +27,7 @@ func (r *regine) nodeWithProperties(entity interface{}, label *string) *Maxine {
 }
 
 func (r *regine) matchNodeWithMatch(entity interface{}, label *string, matchClause M, withReturn bool) *Maxine {
-	maxx := RootMaxx.Parse(entity)
+	maxx := r.rootMaxx.Parse(entity)
 	maxx.ParseMatchClause(matchClause)
 
 	if label == nil {
@@ -47,7 +49,7 @@ func (r *regine) matchNode(entity interface{}, label *string, withReturn bool) *
 
 // CREATE (x:Label {param: $param}) RETURN x
 func (r *regine) createNode(entity interface{}, label *string, withReturn bool, excludes ...string) *Maxine {
-	maxx := RootMaxx.Parse(entity, excludes...)
+	maxx := r.rootMaxx.Parse(entity, excludes...)
 
 	if label == nil {
 		label = &maxx.EntityName
@@ -64,7 +66,7 @@ func (r *regine) createNode(entity interface{}, label *string, withReturn bool, 
 
 // MERGE (x:Label {param: $param}) SET param1 = $param1 RETURN x
 func (r *regine) updateNodeWithMatch(entity interface{}, label *string, matchClause M, withReturn bool, excludes ...string) *Maxine {
-	maxx := RootMaxx.Parse(entity, excludes...)
+	maxx := r.rootMaxx.Parse(entity, excludes...)
 	maxx.ParseMatchClause(matchClause)
 
 	if label == nil {
@@ -92,7 +94,7 @@ func (r *regine) deleteNodeWithMatch(entity interface{}, detach bool, matchClaus
 		detachClause = " DETACH "
 	}
 
-	maxx := RootMaxx.Parse(entity)
+	maxx := r.rootMaxx.Parse(entity)
 	maxx.ParseMatchClause(matchClause)
 
 	maxx.Query = fmt.Sprintf(`MATCH (%s %s)%sDELETE %s`, maxx.Variable, maxx.MatchClause, detachClause, maxx.Variable)

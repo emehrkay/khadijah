@@ -129,22 +129,30 @@ type Knows struct {
 	_ struct{}
 }
 
+type Follows struct {
+	_     struct{}
+	Since string `json:"since"`
+}
+
 var (
 	ul                = "user"
 	userLabel *string = &ul
 	userJ             = TestJsonUser{
-		ID:    "someeyedee",
-		Name:  "somename",
-		Email: "emailTest",
+		ID:    "someeyedeeJSON",
+		Name:  "somenameJSON",
+		Email: "emailTestJSON",
 	}
 
 	userC = TestCustomUser{
-		ID:    "someeyedee",
-		Name:  "somename",
-		Email: "emailTest",
+		ID:    "someeyedeeCUSTOM",
+		Name:  "somenameCUSTOM",
+		Email: "emailTestCUSTOM",
 	}
 
-	knows = Knows{}
+	knows   = Knows{}
+	follows = Follows{
+		Since: "yesterday",
+	}
 
 	cases = []InstanceTypes{
 		{
@@ -216,13 +224,13 @@ func TestCreateNode(t *testing.T) {
 				},
 				{
 					"create while excluding everything and with a return",
-					fmt.Sprintf("CREATE (%s:%s {}) RETURN %s", instance.Variable, *userLabel, instance.Variable),
+					fmt.Sprintf("CREATE (%s:%s ) RETURN %s", instance.Variable, *userLabel, instance.Variable),
 					true,
 					[]string{"id", "name", "email"},
 				},
 				{
 					"create while excluding everything and without a return",
-					fmt.Sprintf("CREATE (%s:%s {})", instance.Variable, *userLabel),
+					fmt.Sprintf("CREATE (%s:%s )", instance.Variable, *userLabel),
 					false,
 					[]string{"id", "name", "email"},
 				},
@@ -385,13 +393,13 @@ func TestDeleteNodeSuite(t *testing.T) {
 				},
 				{
 					"can delete node with default matching",
-					fmt.Sprintf(`MATCH (%s %s) DELETE %s`, instance.Variable, k.RootMaxx.MatchClause, instance.Variable),
+					fmt.Sprintf(`MATCH (%s %s) DELETE %s`, instance.Variable, instance.RootMaxx.MatchClause, instance.Variable),
 					instance.MatchClause,
 					false,
 				},
 				{
 					"can detach delete node with default matching",
-					fmt.Sprintf(`MATCH (%s %s) DETACH DELETE %s`, instance.Variable, k.RootMaxx.MatchClause, instance.Variable),
+					fmt.Sprintf(`MATCH (%s %s) DETACH DELETE %s`, instance.Variable, instance.RootMaxx.MatchClause, instance.Variable),
 					instance.MatchClause,
 					true,
 				},
@@ -439,15 +447,108 @@ func TestDeleteNodeSuite(t *testing.T) {
 }
 
 func TestCreateEdgeSuite(t *testing.T) {
+
 	type Create struct {
-		name     string
-		expected string
+		name             string
+		expected         string
+		startMatchClause k.M
+		direction        string
+		endMatchClasue   k.M
+		relationship     interface{}
+		withReturn       bool
 	}
 
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
-			// instance := k.New(testCase.settings...)
-			// user := testCase.user
+			instance := k.New(testCase.settings...)
+			start := testCase.user
+			end := testCase.user2
+			startVar := instance.StartVariable
+			endVar := instance.EndVariable
+			edgeVar := instance.Variable
+			m := k.Maxine{}
+			sm := m.Parse(start)
+			startLabel := sm.EntityName
+			em := m.Parse(end)
+			endLabel := em.EntityName
+
+			tests := []Create{
+				{
+					"create out edge with default matches and return",
+					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)-[%s:Knows %s]->(%s) RETURN %s, %s, %s`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar, startVar, edgeVar, endVar),
+					k.DefaultMatchClause,
+					"out",
+					k.DefaultMatchClause,
+					knows,
+					true,
+				},
+				{
+					"create in edge with default matches and return",
+					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)<-[%s:Knows %s]-(%s) RETURN %s, %s, %s`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar, startVar, edgeVar, endVar),
+					k.DefaultMatchClause,
+					"in",
+					k.DefaultMatchClause,
+					knows,
+					true,
+				},
+				{
+					"create undirected edge with default matches and return",
+					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)-[%s:Knows %s]-(%s) RETURN %s, %s, %s`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar, startVar, edgeVar, endVar),
+					k.DefaultMatchClause,
+					"",
+					k.DefaultMatchClause,
+					knows,
+					true,
+				},
+				{
+					"create out edge with default matches and no return",
+					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)-[%s:Knows %s]->(%s)`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar),
+					k.DefaultMatchClause,
+					"out",
+					k.DefaultMatchClause,
+					knows,
+					false,
+				},
+				{
+					"create in edge with default matches and return",
+					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)<-[%s:Knows %s]-(%s)`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar),
+					k.DefaultMatchClause,
+					"in",
+					k.DefaultMatchClause,
+					knows,
+					false,
+				},
+				{
+					"create undirected edge with default matches and return",
+					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)-[%s:Knows %s]-(%s)`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar),
+					k.DefaultMatchClause,
+					"",
+					k.DefaultMatchClause,
+					knows,
+					false,
+				},
+			}
+
+			for _, test := range tests {
+				t.Run(test.name, func(t *testing.T) {
+					t.Run("CreateEdgeWithMatches", func(t *testing.T) {
+						maxx := instance.CreateEdgeWithMatches(start, nil, test.startMatchClause, test.direction, end, nil, test.endMatchClasue, test.relationship, nil, test.withReturn)
+
+						if maxx.Query != test.expected {
+							t.Errorf("expected:\n\t%s but got:\n\t%s", test.expected, maxx.Query)
+						}
+					})
+
+					t.Run("CreateEdgeWithMatches", func(t *testing.T) {
+						maxx := instance.CreateEdge(start, end, test.relationship, test.direction, nil, nil, nil, test.withReturn)
+
+						if maxx.Query != test.expected {
+							t.Errorf("expected:\n\t%s but got:\n\t%s", test.expected, maxx.Query)
+						}
+					})
+				})
+			}
+
 		})
 	}
 }
