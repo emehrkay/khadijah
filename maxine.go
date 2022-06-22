@@ -108,16 +108,26 @@ func (m *Maxine) Parse(entity interface{}, exclude ...string) *Maxine {
 }
 
 func (m *Maxine) ParseMatchClause(matchClause M) {
-	clause := []string{}
+	clauses := []string{}
 
 	for k, v := range matchClause {
 		tagValue := m.GetTag(v)
-		clause = append(clause, fmt.Sprintf(`%s: $%s`, k, tagValue))
-		m.Params[tagValue] = tagValue
+
+		if strings.Contains(k, "id(") {
+			k = strings.Replace(k, "+v+", m.Variable, -1)
+			clauses = append(clauses, fmt.Sprintf(`%s = $%s`, k, tagValue))
+			continue
+		}
+
+		if strings.Contains(k, "+v+") {
+			k = strings.Replace(k, "+v+", m.Variable, -1)
+		}
+
+		clauses = append(clauses, fmt.Sprintf(`%s = $%s`, k, tagValue))
 	}
 
-	if len(clause) > 0 {
-		m.MatchClause = fmt.Sprintf(`{%s}`, strings.Join(clause, ", "))
+	if len(clauses) > 0 {
+		m.MatchClause = fmt.Sprintf(`%s`, strings.Join(clauses, " AND "))
 	}
 }
 

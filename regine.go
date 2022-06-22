@@ -34,7 +34,7 @@ func (r *regine) matchNodeWithMatch(entity interface{}, label *string, matchClau
 		label = &maxx.EntityName
 	}
 
-	maxx.Query = fmt.Sprintf(`MATCH (%s:%s %s)`, maxx.Variable, *label, maxx.MatchClause)
+	maxx.Query = fmt.Sprintf(`MATCH (%s:%s) WHERE %s`, maxx.Variable, *label, maxx.MatchClause)
 
 	if withReturn {
 		maxx.Query = fmt.Sprintf(`%s RETURN %s`, maxx.Query, maxx.Variable)
@@ -73,7 +73,7 @@ func (r *regine) updateNodeWithMatch(entity interface{}, label *string, matchCla
 		label = &maxx.EntityName
 	}
 
-	maxx.Query = fmt.Sprintf(`MERGE (%s:%s %s) SET %s`, maxx.Variable, *label, maxx.MatchClause, maxx.SetQuery)
+	maxx.Query = fmt.Sprintf(`MERGE (%s:%s) WHERE %s SET %s`, maxx.Variable, *label, maxx.MatchClause, maxx.SetQuery)
 
 	if withReturn {
 		maxx.Query = fmt.Sprintf(`%s RETURN %s`, maxx.Query, maxx.Variable)
@@ -97,7 +97,7 @@ func (r *regine) deleteNodeWithMatch(entity interface{}, detach bool, matchClaus
 	maxx := r.rootMaxx.Parse(entity)
 	maxx.ParseMatchClause(matchClause)
 
-	maxx.Query = fmt.Sprintf(`MATCH (%s %s)%sDELETE %s`, maxx.Variable, maxx.MatchClause, detachClause, maxx.Variable)
+	maxx.Query = fmt.Sprintf(`MATCH (%s) WHERE %s%sDELETE %s`, maxx.Variable, maxx.MatchClause, detachClause, maxx.Variable)
 	return maxx
 }
 

@@ -241,7 +241,7 @@ func TestCreateNode(t *testing.T) {
 					maxx := instance.CreateNode(user, userLabel, test.withReturn, test.excludes...)
 
 					if maxx.Query != test.expected {
-						t.Errorf(`expected: "%s" but got: "%v"`, test.expected, maxx.Query)
+						t.Errorf("\nexpected: \n\t%s \nbut got: \n\t%v\n", test.expected, maxx.Query)
 					}
 				})
 			}
@@ -265,9 +265,10 @@ func TestUpdateNodeSuite(t *testing.T) {
 			tests := []Update{
 				{
 					"should update with default match clause and return",
-					fmt.Sprintf(`MERGE (%s:%s {id: $id}) SET %s, %s, %s RETURN %s`,
+					fmt.Sprintf(`MERGE (%s:%s) WHERE id(%v) = $id SET %s, %s, %s RETURN %s`,
 						instance.Variable,
 						*userLabel,
+						instance.Variable,
 						aliasField(instance.Variable, "id"),
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email"),
@@ -278,9 +279,10 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with default match clause and without a return",
-					fmt.Sprintf(`MERGE (%s:%s {id: $id}) SET %s, %s, %s`,
+					fmt.Sprintf(`MERGE (%s:%s) WHERE id(%v) = $id SET %s, %s, %s`,
 						instance.Variable,
 						*userLabel,
+						instance.Variable,
 						aliasField(instance.Variable, "id"),
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email")),
@@ -290,9 +292,10 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with default match clause while ignoring id and return",
-					fmt.Sprintf(`MERGE (%s:%s {id: $id}) SET %s, %s RETURN %s`,
+					fmt.Sprintf(`MERGE (%s:%s) WHERE id(%v) = $id SET %s, %s RETURN %s`,
 						instance.Variable,
 						*userLabel,
+						instance.Variable,
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email"),
 						instance.Variable),
@@ -302,9 +305,10 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with default match clause while ignoring id and without a return",
-					fmt.Sprintf(`MERGE (%s:%s {id: $id}) SET %s, %s`,
+					fmt.Sprintf(`MERGE (%s:%s) WHERE id(%v) = $id SET %s, %s`,
 						instance.Variable,
 						*userLabel,
+						instance.Variable,
 						aliasField(instance.Variable, "name"),
 						aliasField(instance.Variable, "email")),
 					k.DefaultMatchClause,
@@ -313,7 +317,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with custom match clause while ignoring id and return",
-					fmt.Sprintf(`MERGE (%s:%s {custom: $custom}) SET %s, %s RETURN %s`,
+					fmt.Sprintf(`MERGE (%s:%s) WHERE custom = $custom SET %s, %s RETURN %s`,
 						instance.Variable,
 						*userLabel,
 						aliasField(instance.Variable, "name"),
@@ -325,7 +329,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with custom match clause while ignoring id and without a return",
-					fmt.Sprintf(`MERGE (%s:%s {custom: $custom}) SET %s, %s`,
+					fmt.Sprintf(`MERGE (%s:%s) WHERE custom = $custom SET %s, %s`,
 						instance.Variable,
 						*userLabel,
 						aliasField(instance.Variable, "name"),
@@ -342,7 +346,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 						maxx := instance.UpdateNodeWithMatch(user, userLabel, test.matchClause, test.withReturn, test.excludes...)
 
 						if maxx.Query != test.expected {
-							t.Errorf(`expected: "%s" but got: "%v"`, test.expected, maxx.Query)
+							t.Errorf("\nexpected: \n\t%s \nbut got: \n\t%v\n", test.expected, maxx.Query)
 						}
 					})
 
@@ -357,7 +361,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 						maxx := instance.UpdateNode(user, userLabel, test.withReturn, test.excludes...)
 
 						if maxx.Query != test.expected {
-							t.Errorf(`expected: "%s" but got: "%v"`, test.expected, maxx.Query)
+							t.Errorf("\nexpected: \n\t%s \nbut got: \n\t%v\n", test.expected, maxx.Query)
 						}
 					})
 				})
@@ -381,25 +385,25 @@ func TestDeleteNodeSuite(t *testing.T) {
 			tests := []Delete{
 				{
 					"can delete node with custom matching",
-					fmt.Sprintf(`MATCH (%s {abcDEFG: $a}) DELETE %s`, instance.Variable, instance.Variable),
+					fmt.Sprintf(`MATCH (%s) WHERE abcDEFG = $a DELETE %s`, instance.Variable, instance.Variable),
 					k.M{"abcDEFG": "a"},
 					false,
 				},
 				{
 					"can detach delete node with custom matching",
-					fmt.Sprintf(`MATCH (%s {abcDEFG: $a}) DETACH DELETE %s`, instance.Variable, instance.Variable),
+					fmt.Sprintf(`MATCH (%s) WHERE abcDEFG = $a DETACH DELETE %s`, instance.Variable, instance.Variable),
 					k.M{"abcDEFG": "a"},
 					true,
 				},
 				{
 					"can delete node with default matching",
-					fmt.Sprintf(`MATCH (%s %s) DELETE %s`, instance.Variable, instance.RootMaxx.MatchClause, instance.Variable),
+					fmt.Sprintf(`MATCH (%s) WHERE %s DELETE %s`, instance.Variable, instance.RootMaxx.MatchClause, instance.Variable),
 					instance.MatchClause,
 					false,
 				},
 				{
 					"can detach delete node with default matching",
-					fmt.Sprintf(`MATCH (%s %s) DETACH DELETE %s`, instance.Variable, instance.RootMaxx.MatchClause, instance.Variable),
+					fmt.Sprintf(`MATCH (%s) WHERE %s DETACH DELETE %s`, instance.Variable, instance.RootMaxx.MatchClause, instance.Variable),
 					instance.MatchClause,
 					true,
 				},
@@ -411,7 +415,7 @@ func TestDeleteNodeSuite(t *testing.T) {
 						maxx := instance.DeleteNodeWithMatch(user, test.detach, test.matchClause)
 
 						if maxx.Query != test.expected {
-							t.Errorf(`expected: "%s" but got: "%s"`, test.expected, maxx.Query)
+							t.Errorf("\nexpected: \n\t%s \nbut got: \n\t%v\n", test.expected, maxx.Query)
 						}
 					})
 
@@ -424,7 +428,7 @@ func TestDeleteNodeSuite(t *testing.T) {
 						maxx := instance.DetachDeleteNodeWithMatch(user, test.matchClause)
 
 						if maxx.Query != test.expected {
-							t.Errorf(`expected: "%s" but got: "%v"`, test.expected, maxx.Query)
+							t.Errorf("\nexpected: \n\t%s \nbut got: \n\t%v\n", test.expected, maxx.Query)
 						}
 					})
 
@@ -437,7 +441,7 @@ func TestDeleteNodeSuite(t *testing.T) {
 						maxx := instance.DetachDeleteNode(user)
 
 						if maxx.Query != test.expected {
-							t.Errorf(`expected: "%s" but got: "%v"`, test.expected, maxx.Query)
+							t.Errorf("\nexpected: \n\t%s \nbut got: \n\t%v\n", test.expected, maxx.Query)
 						}
 					})
 				})
@@ -475,7 +479,20 @@ func TestCreateEdgeSuite(t *testing.T) {
 			tests := []Create{
 				{
 					"create out edge with default matches and return",
-					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)-[%s:Knows %s]->(%s) RETURN %s, %s, %s`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar, startVar, edgeVar, endVar),
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%s) = $start_id MATCH (%s:%s) WHERE id(%s) = $end_id CREATE (%s)-[%s:Knows %s]->(%s) RETURN %s, %s, %s`,
+						startVar,
+						startLabel,
+						startVar,
+						endVar,
+						endLabel,
+						endVar,
+						startVar,
+						edgeVar,
+						instance.RootMaxx.CreateQuery,
+						endVar,
+						startVar,
+						edgeVar,
+						endVar),
 					k.DefaultMatchClause,
 					"out",
 					k.DefaultMatchClause,
@@ -484,7 +501,20 @@ func TestCreateEdgeSuite(t *testing.T) {
 				},
 				{
 					"create in edge with default matches and return",
-					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)<-[%s:Knows %s]-(%s) RETURN %s, %s, %s`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar, startVar, edgeVar, endVar),
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%s) = $start_id MATCH (%s:%s) WHERE id(%s) = $end_id CREATE (%s)<-[%s:Knows %s]-(%s) RETURN %s, %s, %s`,
+						startVar,
+						startLabel,
+						startVar,
+						endVar,
+						endLabel,
+						endVar,
+						startVar,
+						edgeVar,
+						instance.RootMaxx.CreateQuery,
+						endVar,
+						startVar,
+						edgeVar,
+						endVar),
 					k.DefaultMatchClause,
 					"in",
 					k.DefaultMatchClause,
@@ -493,7 +523,20 @@ func TestCreateEdgeSuite(t *testing.T) {
 				},
 				{
 					"create undirected edge with default matches and return",
-					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)-[%s:Knows %s]-(%s) RETURN %s, %s, %s`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar, startVar, edgeVar, endVar),
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%s) = $start_id MATCH (%s:%s) WHERE id(%s) = $end_id CREATE (%s)-[%s:Knows %s]-(%s) RETURN %s, %s, %s`,
+						startVar,
+						startLabel,
+						startVar,
+						endVar,
+						endLabel,
+						endVar,
+						startVar,
+						edgeVar,
+						instance.RootMaxx.CreateQuery,
+						endVar,
+						startVar,
+						edgeVar,
+						endVar),
 					k.DefaultMatchClause,
 					"",
 					k.DefaultMatchClause,
@@ -502,7 +545,17 @@ func TestCreateEdgeSuite(t *testing.T) {
 				},
 				{
 					"create out edge with default matches and no return",
-					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)-[%s:Knows %s]->(%s)`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar),
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%s) = $start_id MATCH (%s:%s) WHERE id(%s) = $end_id CREATE (%s)-[%s:Knows %s]->(%s)`,
+						startVar,
+						startLabel,
+						startVar,
+						endVar,
+						endLabel,
+						endVar,
+						startVar,
+						edgeVar,
+						instance.RootMaxx.CreateQuery,
+						endVar),
 					k.DefaultMatchClause,
 					"out",
 					k.DefaultMatchClause,
@@ -511,7 +564,17 @@ func TestCreateEdgeSuite(t *testing.T) {
 				},
 				{
 					"create in edge with default matches and return",
-					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)<-[%s:Knows %s]-(%s)`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar),
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%s) = $start_id MATCH (%s:%s) WHERE id(%s) = $end_id CREATE (%s)<-[%s:Knows %s]-(%s)`,
+						startVar,
+						startLabel,
+						startVar,
+						endVar,
+						endLabel,
+						endVar,
+						startVar,
+						edgeVar,
+						instance.RootMaxx.CreateQuery,
+						endVar),
 					k.DefaultMatchClause,
 					"in",
 					k.DefaultMatchClause,
@@ -520,7 +583,17 @@ func TestCreateEdgeSuite(t *testing.T) {
 				},
 				{
 					"create undirected edge with default matches and return",
-					fmt.Sprintf(`MATCH (%s:%s {id: $start_id}) MATCH (%s:%s {id: $end_id}) CREATE (%s)-[%s:Knows %s]-(%s)`, startVar, startLabel, endVar, endLabel, startVar, edgeVar, instance.RootMaxx.CreateQuery, endVar),
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%s) = $start_id MATCH (%s:%s) WHERE id(%s) = $end_id CREATE (%s)-[%s:Knows %s]-(%s)`,
+						startVar,
+						startLabel,
+						startVar,
+						endVar,
+						endLabel,
+						endVar,
+						startVar,
+						edgeVar,
+						instance.RootMaxx.CreateQuery,
+						endVar),
 					k.DefaultMatchClause,
 					"",
 					k.DefaultMatchClause,
@@ -535,7 +608,7 @@ func TestCreateEdgeSuite(t *testing.T) {
 						maxx := instance.CreateEdgeWithMatches(start, nil, test.startMatchClause, test.direction, end, nil, test.endMatchClasue, test.relationship, nil, test.withReturn)
 
 						if maxx.Query != test.expected {
-							t.Errorf("expected:\n\t%s but got:\n\t%s", test.expected, maxx.Query)
+							t.Errorf("\nexpected: \n\t%s \nbut got: \n\t%v\n", test.expected, maxx.Query)
 						}
 					})
 
@@ -543,7 +616,7 @@ func TestCreateEdgeSuite(t *testing.T) {
 						maxx := instance.CreateEdge(start, end, test.relationship, test.direction, nil, nil, nil, test.withReturn)
 
 						if maxx.Query != test.expected {
-							t.Errorf("expected:\n\t%s but got:\n\t%s", test.expected, maxx.Query)
+							t.Errorf("\nexpected: \n\t%s \nbut got: \n\t%v\n", test.expected, maxx.Query)
 						}
 					})
 				})

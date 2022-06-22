@@ -5,7 +5,7 @@ var (
 	DefaultVariable      = "flava"
 	DefaultStartVariable = "start"
 	DefaultEndVariable   = "end"
-	DefaultMatchClause   = M{"id": "id"}
+	DefaultMatchClause   = M{"id(+v+)": "id"}
 	DefaultSettings      = []KhadijahSetting{
 		SetTagName(DefaultTagName),
 		SetVariable(DefaultVariable),
