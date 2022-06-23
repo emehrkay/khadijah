@@ -192,3 +192,15 @@ func (k *Khadijah) UpdateEdgeWithMatches(start interface{}, startLabel *string, 
 func (k *Khadijah) UpdateEdge(start interface{}, startLabel *string, direction string, end interface{}, endLabel *string, edge interface{}, edgeLabel *string, withReturn bool, excldues ...string) *Maxine {
 	return k.UpdateEdgeWithMatches(start, startLabel, DefaultMatchClause, direction, end, endLabel, DefaultMatchClause, edge, edgeLabel, DefaultMatchClause, withReturn, excldues...)
 }
+
+func (k *Khadijah) DeleteEdgeWithMatchingLabels(startLabel, direction, endLabel string, edge interface{}, edgeLabel string, edgeMatchClause M) *Maxine {
+	syn := newSynclaire(k.MatchClause, k.StartVariable, k.EndVariable, k.RootMaxx)
+
+	return syn.deleteEdgeWithMatchingLabels(startLabel, direction, endLabel, edge, edgeLabel, edgeMatchClause)
+}
+
+func (k *Khadijah) DeleteEdge(edge interface{}, edgeLabel, direction string, edgeMatchClause M) *Maxine {
+	syn := newSynclaire(k.MatchClause, k.StartVariable, k.EndVariable, k.RootMaxx)
+
+	return syn.deleteEdge(edge, edgeLabel, direction, edgeMatchClause)
+}

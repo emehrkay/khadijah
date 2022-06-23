@@ -112,3 +112,31 @@ func (s *synclarie) updateEdgeWithMatches(start interface{}, startLabel *string,
 
 	return maxx
 }
+
+func (s *synclarie) deleteEdgeWithMatchingLabels(startLabel, direction, endLabel string, edge interface{}, edgeLabel string, edgeMatchClause M) *Maxine {
+	dirStart, dirEnd := s.getDirection(direction)
+	maxx := s.rootMaxx.Parse(edge)
+	maxx.Query = fmt.Sprintf(`MATCH (:%s)%s(%s:%s)%s(:%s) DELETE %s`,
+		startLabel,
+		dirStart,
+		maxx.Variable,
+		edgeLabel,
+		dirEnd,
+		edgeLabel,
+		maxx.Variable)
+
+	return maxx
+}
+
+func (s *synclarie) deleteEdge(edge interface{}, edgeLabel, direction string, edgeMatchClause M) *Maxine {
+	dirStart, dirEnd := s.getDirection(direction)
+	maxx := s.rootMaxx.Parse(edge)
+	maxx.Query = fmt.Sprintf(`MATCH ()%s(%s:%s)%s() DELETE %s`,
+		dirStart,
+		maxx.Variable,
+		edgeLabel,
+		dirEnd,
+		maxx.Variable)
+
+	return maxx
+}

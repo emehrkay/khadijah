@@ -265,7 +265,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 			tests := []Update{
 				{
 					"should update with default match clause and return",
-					fmt.Sprintf(`MERGE (%s:%s) WHERE id(%v) = $id SET %s, %s, %s RETURN %s`,
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%v) = $id SET %s, %s, %s RETURN %s`,
 						instance.Variable,
 						*userLabel,
 						instance.Variable,
@@ -279,7 +279,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with default match clause and without a return",
-					fmt.Sprintf(`MERGE (%s:%s) WHERE id(%v) = $id SET %s, %s, %s`,
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%v) = $id SET %s, %s, %s`,
 						instance.Variable,
 						*userLabel,
 						instance.Variable,
@@ -292,7 +292,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with default match clause while ignoring id and return",
-					fmt.Sprintf(`MERGE (%s:%s) WHERE id(%v) = $id SET %s, %s RETURN %s`,
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%v) = $id SET %s, %s RETURN %s`,
 						instance.Variable,
 						*userLabel,
 						instance.Variable,
@@ -305,7 +305,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with default match clause while ignoring id and without a return",
-					fmt.Sprintf(`MERGE (%s:%s) WHERE id(%v) = $id SET %s, %s`,
+					fmt.Sprintf(`MATCH (%s:%s) WHERE id(%v) = $id SET %s, %s`,
 						instance.Variable,
 						*userLabel,
 						instance.Variable,
@@ -317,7 +317,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with custom match clause while ignoring id and return",
-					fmt.Sprintf(`MERGE (%s:%s) WHERE custom = $custom SET %s, %s RETURN %s`,
+					fmt.Sprintf(`MATCH (%s:%s) WHERE custom = $custom SET %s, %s RETURN %s`,
 						instance.Variable,
 						*userLabel,
 						aliasField(instance.Variable, "name"),
@@ -329,7 +329,7 @@ func TestUpdateNodeSuite(t *testing.T) {
 				},
 				{
 					"should update with custom match clause while ignoring id and without a return",
-					fmt.Sprintf(`MERGE (%s:%s) WHERE custom = $custom SET %s, %s`,
+					fmt.Sprintf(`MATCH (%s:%s) WHERE custom = $custom SET %s, %s`,
 						instance.Variable,
 						*userLabel,
 						aliasField(instance.Variable, "name"),

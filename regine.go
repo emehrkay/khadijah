@@ -73,7 +73,7 @@ func (r *regine) updateNodeWithMatch(entity interface{}, label *string, matchCla
 		label = &maxx.EntityName
 	}
 
-	maxx.Query = fmt.Sprintf(`MERGE (%s:%s) WHERE %s SET %s`, maxx.Variable, *label, maxx.MatchClause, maxx.SetQuery)
+	maxx.Query = fmt.Sprintf(`MATCH (%s:%s) WHERE %s SET %s`, maxx.Variable, *label, maxx.MatchClause, maxx.SetQuery)
 
 	if withReturn {
 		maxx.Query = fmt.Sprintf(`%s RETURN %s`, maxx.Query, maxx.Variable)
