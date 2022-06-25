@@ -86,6 +86,12 @@ func (m *Maxine) Parse(entity interface{}, exclude ...string) *Maxine {
 		}
 
 		tagFixed := m.GetTag(tag)
+		fieldValue := entityValue.FieldByName(field.Name)
+
+		// if we cant abstract the value, do not include the field
+		if !fieldValue.CanInterface() {
+			continue
+		}
 
 		// only add the param if it is not in the exclude list
 		if ok && !Contains(exclude, tag) {
@@ -93,7 +99,6 @@ func (m *Maxine) Parse(entity interface{}, exclude ...string) *Maxine {
 			setParams = append(setParams, fmt.Sprintf(`%s.%s = $%s`, maxx.Variable, tag, tagFixed))
 		}
 
-		fieldValue := entityValue.FieldByName(field.Name)
 		value := fieldValue.Interface()
 		maxx.Params[tagFixed] = value
 	}
